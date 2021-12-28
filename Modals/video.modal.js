@@ -5,7 +5,7 @@ const VideoSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
-  videoId: {
+  videoID: {
     type: String,
     required: true,
   },
@@ -17,7 +17,10 @@ const VideoSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
-
+  thumbnail: {
+    type: String,
+    required: true,
+  },
   channelName: {
     type: String,
     required: true,
@@ -26,17 +29,16 @@ const VideoSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
-  channelSubscribers: {
-    type: Number,
+  category: {
+    type: String,
+    required: true,
   },
   duration: {
     type: String,
     required: true,
   },
+  likesBy: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
   likes: {
-    type: Number,
-  },
-  dislikes: {
     type: Number,
   },
   views: {
