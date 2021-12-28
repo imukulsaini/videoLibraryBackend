@@ -6,12 +6,7 @@ const { checkUserID } = require("../controllers/users.controller.js");
 const { User } = require("../Modals/user.modal.js");
 const { Video } = require("../Modals/video.modal");
 
-
-
-
 router.param("userID", checkUserID);
-
-
 
 router
   .route("/:userID/watchlater")
@@ -36,7 +31,7 @@ router
     );
 
     if (watchLaterVideoExist) {
-      return res.status(403).json({ message:" video already exit" });
+      return res.status(403).json({ message: " video already exit" });
     } else {
       user.watchLater.push(videoId);
 
@@ -61,13 +56,13 @@ router
       (video) => video._id != videoId
     );
 
-     await User.findByIdAndUpdate(
+    await User.findByIdAndUpdate(
       _id,
       {
         watchLater: getWatchLaterVideos,
       },
       options
-    ).populate("watchLater") ;
+    ).populate("watchLater");
 
     res.status(204).send();
     //  json({
@@ -77,8 +72,5 @@ router
     // userData : updateWatchLaterInUser,
     // status:201})
   });
-
-
-
 
 module.exports = router;

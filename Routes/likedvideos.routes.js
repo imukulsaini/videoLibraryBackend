@@ -19,10 +19,7 @@ router
     });
   })
 
-
   .post(async (req, res) => {
-
-
     let { user } = req;
 
     const { videoId } = req.body;
@@ -38,12 +35,9 @@ router
       user,
       message: " user like a new video  ",
     });
-
-
   })
 
   .delete(async (req, res) => {
-      
     let { user } = req;
 
     const { videoId } = req.body;
@@ -66,7 +60,5 @@ router
     //     status: 201
     // })
   });
-
-
 
 module.exports = router;

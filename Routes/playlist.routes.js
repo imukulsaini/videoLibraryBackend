@@ -19,7 +19,6 @@ router
     res.status(200).json({ playlist });
   })
 
-
   .post(async (req, res) => {
     let { user } = req;
     const { _id } = user;
@@ -33,8 +32,6 @@ router
     res.status(201).json({ userPlaylist });
   });
 
-
-
 router.param("playlistID", checkPlaylistID);
 
 router
@@ -46,10 +43,7 @@ router
     res.status(200).json({ playlist });
   })
 
-
-
   .post(async (req, res) => {
-
     let { user } = req;
 
     let { playlist } = req;
@@ -62,8 +56,6 @@ router
       );
 
       if (playlistVideoExist) {
-
-
         //remove video in playlist
         const getVideosFromPlayList = await playlist.videos.filter(
           (video) => video._id != videoId
@@ -72,37 +64,26 @@ router
         playlist.videos = getVideosFromPlayList;
         await user.save();
         const userPlaylist = user.playlist;
-        return res
-          .status(201)
-          .json({
-            message: "video deleted from playlist",
-            playlist: userPlaylist,
-          });
-
-
+        return res.status(201).json({
+          message: "video deleted from playlist",
+          playlist: userPlaylist,
+        });
       } else {
-
-
         //add video in playlist
 
         playlist.videos.push(videoId);
 
         await user.save();
         const userPlaylist = user.playlist;
-        return res
-          .status(201)
-          .json({
-            message: "a new video is added in playlist ",
-            playlist: userPlaylist,
-          });
-
-          
+        return res.status(201).json({
+          message: "a new video is added in playlist ",
+          playlist: userPlaylist,
+        });
       }
     } else {
       return res.status(404).json({ message: "video is not found" });
     }
   })
-
 
   .delete(async (req, res) => {
     let { playlist, user } = req;

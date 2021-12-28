@@ -1,15 +1,14 @@
-const { User} = require('../Modals/user.modal.js')
+const { User } = require("../Modals/user.modal.js");
 const mySecret = process.env["keySecret"];
 
 const bcrypt = require("bcrypt");
 const saltRounds = 10;
 
-
-// check user ID 
+// check user ID
 
 async function checkUserID(req, res, next, id) {
   try {
-      console.log(id);
+    console.log(id);
     const isUserExist = await User.findById(id)
       .populate("watchLater")
       .populate("likedVideo")
@@ -25,37 +24,32 @@ async function checkUserID(req, res, next, id) {
 //update user profile
 
 async function updateUserProfile(userID, userData) {
+  const isUserNameExist = await User.findOne({
+    username: userData.username,
+  });
 
-    const isUserNameExist = await User.findOne({
-        username:userData.username
-    });
-
-    if(isUserNameExist && isUserNameExist._id == userID) {
-
+  if (isUserNameExist && isUserNameExist._id == userID) {
     const updatedUser = await User.findOneAndUpdate(
-                { _id: userID },
-                    {
-                      $set: userData,
-                    },
-                    { new: true }
-                    );
-                return updatedUser ;
-    }else if(isUserNameExist && isUserNameExist._id !== userID ){
-            return {errorMessage:'username already exist'}
-    }else{
-          const updatedUser = await User.findOneAndUpdate(
-                { _id: userID },
-                    {
-                      $set: userData,
-                    },
-                    { new: true }
-                    );
-                return updatedUser;
-    }
-   
-    }
-
-
+      { _id: userID },
+      {
+        $set: userData,
+      },
+      { new: true }
+    );
+    return updatedUser;
+  } else if (isUserNameExist && isUserNameExist._id !== userID) {
+    return { errorMessage: "username already exist" };
+  } else {
+    const updatedUser = await User.findOneAndUpdate(
+      { _id: userID },
+      {
+        $set: userData,
+      },
+      { new: true }
+    );
+    return updatedUser;
+  }
+}
 
 // update Password
 
@@ -90,8 +84,5 @@ async function compareAndUpdatePassword(
     return false;
   }
 }
-
-
-
 
 module.exports = { checkUserID, updateUserProfile, compareAndUpdatePassword };
