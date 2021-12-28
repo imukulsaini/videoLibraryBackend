@@ -1,35 +1,28 @@
 const express = require("express");
 const router = express.Router();
 const { extend } = require("lodash");
+const { checkUserID } = require("../controllers/users.controller.js");
 
 const { User } = require("../Modals/user.modal.js");
 const { Video } = require("../Modals/video.modal");
 
-router.param("userId", async (req, res, next, id) => {
-  try {
-    const userIdCheck = await User.findById(id)
 
-      .populate("likedVideo.videoId")
-      .populate("watchLater")
-      .populate("playlist.videoId");
 
-    req.user = userIdCheck;
-    next();
-  } catch (error) {
-    res.json({ status: 401, message: "user Id is not Valid" });
-  }
-});
+
+router.param("userID", checkUserID);
+
+
 
 router
-  .route("/:userId/watchlater")
+  .route("/:userID/watchlater")
+
   .get(async (req, res) => {
     const { user } = req;
 
     const { watchLater } = user;
 
-    res.json({
+    res.status(200).json({
       watchLaterVideos: watchLater,
-      status: 201,
     });
   })
 
@@ -43,18 +36,19 @@ router
     );
 
     if (watchLaterVideoExist) {
-      return res.json({ message: "video already exit " });
+      return res.status(403).json({ message:" video already exit" });
     } else {
       user.watchLater.push(videoId);
 
       await user.save();
-
-      return res.json({
-        status: 201,
-        message: "New Watch Later Video Added",
+      const video = await Video.findById(videoId);
+      return res.status(201).json({
+        video,
+        message: " a new video added in watch later ",
       });
     }
   })
+
   .delete(async (req, res) => {
     let { videoId } = req.body;
     const { user } = req;
@@ -67,20 +61,24 @@ router
       (video) => video._id != videoId
     );
 
-    const updateWatchLaterInUser = await User.findByIdAndUpdate(
+     await User.findByIdAndUpdate(
       _id,
       {
         watchLater: getWatchLaterVideos,
       },
       options
-    ).populate("watchLater");
+    ).populate("watchLater") ;
 
-    res.json({
-      message: "update watchLater successfully ",
+    res.status(204).send();
+    //  json({
 
-      userData: updateWatchLaterInUser,
-      status: true,
-    });
+    // message:'update watchLater successfull ',
+
+    // userData : updateWatchLaterInUser,
+    // status:201})
   });
+
+
+
 
 module.exports = router;
