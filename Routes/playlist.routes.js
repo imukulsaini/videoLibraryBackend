@@ -1,29 +1,25 @@
 const express = require("express");
 const router = express.Router();
 const { extend } = require("lodash");
+const { checkPlaylistID } = require("../controllers/playlist.controller.js");
+const { checkUserID } = require("../controllers/users.controller.js");
 
 const { User } = require("../Modals/user.modal.js");
 const { Video } = require("../Modals/video.modal");
 
-router.param("userId", async (req, res, next, id) => {
-  try {
-    const userIdCheck = await User.findById(id).populate("playlist.videos");
-
-    req.user = userIdCheck;
-    next();
-  } catch (error) {
-    res.json({ status: 401, message: "user Id is not Valid" });
-  }
-});
+router.param("userID", checkUserID);
 
 router
-  .route("/:userId/playlist")
+  .route("/:userID/playlist")
+
   .get(async (req, res) => {
     let { user } = req;
     let { playlist } = user;
 
-    res.json({ status: 201, playlist });
+    res.status(200).json({ playlist });
   })
+
+
   .post(async (req, res) => {
     let { user } = req;
     const { _id } = user;
@@ -32,73 +28,88 @@ router
 
     user.playlist.push({ name: name });
     await user.save();
+    const userPlaylist = user.playlist;
 
-    res.json({ status: 201, userData: user });
+    res.status(201).json({ userPlaylist });
   });
 
-router.param("playlistId", async (req, res, next, id) => {
-  try {
-    let { user } = req;
-    const playlistExist = await user.playlist.find((item) => item._id == id);
 
-    req.playlist = playlistExist;
-    next();
-  } catch (error) {
-    res.json({ status: 401, message: error.message });
-  }
-});
+
+router.param("playlistID", checkPlaylistID);
 
 router
-  .route("/:userId/playlist/:playlistId")
+  .route("/:userID/playlist/:playlistID")
 
   .get(async (req, res) => {
     const { playlist } = req;
-    res.json({ status: 201, playlist });
+
+    res.status(200).json({ playlist });
   })
+
+
+
   .post(async (req, res) => {
+
     let { user } = req;
 
     let { playlist } = req;
     const options = { new: true };
 
-    const { name, videoId } = req.body;
-
+    const { videoId } = req.body;
     if (videoId) {
       const playlistVideoExist = await playlist.videos.find(
         (video) => video._id == videoId
       );
 
       if (playlistVideoExist) {
+
+
+        //remove video in playlist
         const getVideosFromPlayList = await playlist.videos.filter(
           (video) => video._id != videoId
         );
 
         playlist.videos = getVideosFromPlayList;
         await user.save();
-        return res.json({ status: 201, message: "delete video successfully" });
+        const userPlaylist = user.playlist;
+        return res
+          .status(201)
+          .json({
+            message: "video deleted from playlist",
+            playlist: userPlaylist,
+          });
+
+
       } else {
+
+
+        //add video in playlist
+
         playlist.videos.push(videoId);
 
-        playlist.markModified("videos");
-        user.markModified("playlist");
-
         await user.save();
+        const userPlaylist = user.playlist;
+        return res
+          .status(201)
+          .json({
+            message: "a new video is added in playlist ",
+            playlist: userPlaylist,
+          });
 
-        return res.json({
-          status: 201,
-          message: "video added successfully ",
-          user,
-        });
+          
       }
     } else {
-      return res.json({ message: "video is not present" });
+      return res.status(404).json({ message: "video is not found" });
     }
   })
+
+
   .delete(async (req, res) => {
     let { playlist, user } = req;
+
     await playlist.remove();
     await user.save();
-    res.json({ status: 201, message: "playlist deleted" });
+    res.status(204).send();
   });
 
 module.exports = router;
