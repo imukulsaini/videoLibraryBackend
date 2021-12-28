@@ -1,103 +1,72 @@
 const express = require("express");
 const router = express.Router();
 const { extend } = require("lodash");
+const { checkUserID } = require("../controllers/users.controller.js");
 
 const { User } = require("../Modals/user.modal.js");
 const { Video } = require("../Modals/video.modal");
 
-router.param("userId", async (req, res, next, id) => {
-  try {
-    const userIdCheck = await User.findById(id)
-      .populate("likedVideo")
-      .populate("watchLater");
-
-    req.user = userIdCheck;
-    next();
-  } catch (error) {
-    res.json({ status: 401, message: "user Id is not Valid" });
-  }
-});
+router.param("userID", checkUserID);
 
 router
-  .route("/:userId/likedVideo")
+  .route("/:userID/likedVideo")
+
   .get(async (req, res) => {
     const { user } = req;
     const { likedVideo } = user;
-    res.json({
+    res.status(200).json({
       likedVideos: likedVideo,
-      status: 201,
     });
   })
 
+
   .post(async (req, res) => {
+
+
     let { user } = req;
 
     const { videoId } = req.body;
-    let { _id } = user;
+    let isVideoExist = await Video.findById(videoId);
+    isVideoExist.likesBy.push(req.params.userID);
+    isVideoExist.likes = isVideoExist.likes + 1;
+    await isVideoExist.save();
 
-    const options = { new: true };
+    user.likedVideo.push(videoId);
+    await user.save();
+    res.status(201).json({
+      video: isVideoExist,
+      user,
+      message: " user like a new video  ",
+    });
 
-    let likedVideoExist = await user.likedVideo.find(
-      (video) => video._id == videoId
-    );
 
-    if (!likedVideoExist) {
-      let updateVideoLikes = await Video.findByIdAndUpdate(
-        videoId,
-        {
-          $inc: { likes: 1 },
-        },
-        options
-      );
-
-      user.likedVideo.push(videoId);
-      await user.save();
-
-      res.json({
-        updateLikedVideo: updateVideoLikes,
-        user,
-        status: 201,
-        message: "new video in likedVideo saved Successfully ",
-      });
-    } else {
-      res.json({ message: "already Liked By User" });
-    }
   })
 
   .delete(async (req, res) => {
+      
     let { user } = req;
 
     const { videoId } = req.body;
-    let { _id } = user;
 
-    const options = { new: true };
+    const isVideoExist = await Video.findById(videoId);
 
-    const getLikedVideos = await user.likedVideo.filter(
-      (video) => video._id != videoId
-    );
+    isVideoExist.likesBy.pull(req.params.userID);
+    isVideoExist.likes = isVideoExist.likes - 1;
+    await isVideoExist.save();
 
-    const updateLikedVideoInUser = await User.findByIdAndUpdate(
-      _id,
-      {
-        likedVideo: getLikedVideos,
-      },
-      options
-    ).populate("likedVideo");
+    user.likedVideo.pull(videoId);
+    await user.save();
 
-    const updateVideoLikes = await Video.findByIdAndUpdate(
-      videoId,
-      {
-        $inc: { likes: -1 },
-      },
-      options
-    );
+    res.status(204).send();
 
-    res.json({
-      message: "update watchLater successfully ",
-      updateLikedVideo: updateVideoLikes,
-      user: updateLikedVideoInUser,
-      status: 201,
-    });
+    // json({
+    //     message: '',
+    //     video: videoExist,
+    //     user,
+    //     status: 201
+    // })
   });
+
+
 
 module.exports = router;
