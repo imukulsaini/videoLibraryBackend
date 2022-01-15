@@ -35,7 +35,7 @@ router
 router.param("playlistID", checkPlaylistID);
 
 router
-  .route(":playlistID")
+  .route("/:playlistID")
 
   .get(async (req, res) => {
     const { playlist } = req;
