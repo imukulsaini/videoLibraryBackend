@@ -6,10 +6,9 @@ const { checkUserID } = require("../controllers/users.controller.js");
 const { User } = require("../Modals/user.modal.js");
 const { Video } = require("../Modals/video.modal");
 
-router.param("userID", checkUserID);
 
 router
-  .route("/:userID/likedVideo")
+  .route("/")
 
   .get(async (req, res) => {
     const { user } = req;

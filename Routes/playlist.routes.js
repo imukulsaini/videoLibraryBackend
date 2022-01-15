@@ -10,7 +10,7 @@ const { Video } = require("../Modals/video.modal");
 router.param("userID", checkUserID);
 
 router
-  .route("/:userID/playlist")
+  .route("/")
 
   .get(async (req, res) => {
     let { user } = req;
@@ -35,7 +35,7 @@ router
 router.param("playlistID", checkPlaylistID);
 
 router
-  .route("/:userID/playlist/:playlistID")
+  .route(":playlistID")
 
   .get(async (req, res) => {
     const { playlist } = req;

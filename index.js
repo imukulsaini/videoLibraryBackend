@@ -11,7 +11,7 @@ const authVerify = require('./middlewares/authVerify.middleware.js')
 const { routeErrorHandler } = require('./middlewares/routeErrorHandler.middleware.js');
 const { errorHandler } = require('./middlewares/errorHandler.middleware.js');
 const mySecret = process.env['keySecret']
-
+const { checkUserID } = require('./controllers/users.controller.js');
 
 app.use(cors())
 app.use(bodyParser.json());
@@ -43,9 +43,12 @@ app.use("/v1/", userV1)
 
 // private Route 
 
-app.use("/v1/", authVerify, likedVideoV1);
-app.use("/v1/", authVerify, watchLaterV1)
-app.use("/v1/", authVerify, playListV1)
+app.param("userID",checkUserID) ;
+
+app.use("/v1/users/:userID/likedVideo", authVerify, likedVideoV1);
+app.use("/v1/users/:userID/watchlater", authVerify, watchLaterV1)
+app.use("/v1/users/:userID/playlist", authVerify, playListV1)
+
 
 
 

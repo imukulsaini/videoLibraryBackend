@@ -9,7 +9,7 @@ const { Video } = require("../Modals/video.modal");
 router.param("userID", checkUserID);
 
 router
-  .route("/:userID/watchlater")
+  .route("/")
 
   .get(async (req, res) => {
     const { user } = req;
