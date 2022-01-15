@@ -8,7 +8,6 @@ const saltRounds = 10;
 
 async function checkUserID(req, res, next, id) {
   try {
-    console.log(id);
     const isUserExist = await User.findById(id)
       .populate("watchLater")
       .populate("likedVideo")
